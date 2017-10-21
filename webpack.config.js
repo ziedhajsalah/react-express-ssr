@@ -1,10 +1,22 @@
 const path = require('path');
+const webpack = require('webpack');
 
 const config = {
-  entry: ['babel-polyfill', './lib/renderers/dom.js'],
+  entry: {
+    vendor: [
+      'babel-polyfill',
+      'react',
+      'react-dom',
+      'axios',
+      'prop-types',
+      'lodash.debounce',
+      'lodash.pickby',
+    ],
+    app: ['./lib/renderers/dom.js'],
+  },
   output: {
     path: path.resolve(__dirname, 'public'),
-    filename: 'bundle.js',
+    filename: '[name].js',
   },
   resolve: {
     modules: [
@@ -13,8 +25,24 @@ const config = {
     ],
   },
   module: {
-    rules: [{ test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' }],
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['react', 'env', 'stage-2'],
+          },
+        },
+      },
+    ],
   },
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+    }),
+  ],
 };
 
 module.exports = config;
